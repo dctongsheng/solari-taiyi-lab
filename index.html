@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solari Taiyi Lab</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/framer-motion@11.0.8/dist/framer-motion.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Noto Serif SC', Georgia, serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        ::selection {
+            background-color: #B9432B;
+            color: #FFE4AF;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    <script type="text/babel">
+        const { useState, useEffect, useMemo } = React;
+        const { motion, useMotionTemplate, useMotionValue, useSpring, useTransform } = Motion;
+
+        const colors = {
+            ink: "#5A493F",
+            inkSoft: "#716052",
+            muted: "#857769",
+            accent: "#B9432B",
+            cream: "#FFE4AF",
+        };
+
+        const quickNav = [
+            { label: "About", page: "about" },
+            { label: "Join", page: "careers" },
+        ];
+
+        const careerRoles = [
+            {
+                title: "Agentic Post-training Algorithm",
+                type: "Full-time",
+                responsibilities: [
+                    "Lead post-training for agentic models across MCP, Deep Research, Coding Agent, and related tool-use environments.",
+                    "Design and optimize SFT / RL training pipelines for agentic behavior, tool use, planning, and multi-step task completion.",
+                    "Build agentic training infrastructure and extend evaluation suites such as MCP-Universe, MCPMark, and Terminal-Bench.",
+                    "Use evaluation feedback to define training objectives and drive model iteration.",
+                ],
+                preferred: [
+                    "Hands-on experience with agentic post-training for MCP, Deep Research, Coding Agent, or similar systems.",
+                    "Practical experience with large model training and SFT / RL workflows such as GRPO or DAPO.",
+                    "First-author publications at NeurIPS, ICML, ICLR, ACL, or related venues are a plus.",
+                    "Meaningful open-source contributions or independently maintained repositories are highly valued.",
+                ],
+            },
+            {
+                title: "AI Product Manager, Agent Applications",
+                type: "Full-time",
+                responsibilities: [
+                    "Own AI Agent / AI application products from zero to one, including product strategy, prototypes, PRDs, and iteration plans.",
+                    "Identify real user scenarios across personal productivity, team collaboration, workflow automation, and conversational interaction.",
+                    "Design agent interaction flows, task planning, tool use, memory, multi-agent collaboration, prompts, skills, and context management.",
+                    "Work closely with research, engineering, design, and operations to ship high-quality AI products.",
+                    "Use code or low-code tools to quickly build demos and MVPs for product validation.",
+                ],
+                preferred: [
+                    "Experience building AI demos, tools, or MVP prototypes independently.",
+                    "Strong understanding of agent mechanisms such as task decomposition, tool use, memory, and planning.",
+                    "Experience shipping an AI Agent product from zero to one.",
+                    "Familiarity with prompt engineering, model evaluation, and conversation orchestration.",
+                    "Experience at a major technology company is a plus.",
+                ],
+            },
+            {
+                title: "Inference Acceleration",
+                type: "Intern",
+                responsibilities: [
+                    "Design new speculative decoding algorithms, including draft model design, draft optimization, and self-speculative decoding methods.",
+                    "Explore inference acceleration techniques such as quantization, sparse attention, and system-level optimization.",
+                    "Research parallel decoding methods and practical serving optimizations for agentic model workloads.",
+                ],
+                preferred: [
+                    "Hands-on experience with speculative decoding and familiarity with EAGLE, Medusa, SpecInfer, DFlash, or related systems.",
+                    "First-author publications in inference acceleration or parallel decoding at NeurIPS, ICML, ICLR, ACL, or related venues.",
+                    "Meaningful open-source contributions or independently maintained repositories are highly valued.",
+                ],
+            },
+            {
+                title: "Agentic Post-training Infrastructure & Evaluation",
+                type: "Intern",
+                responsibilities: [
+                    "Build and maintain infrastructure for agentic training and evaluation, including environments, tool calls, and data pipelines.",
+                    "Support SFT / RL post-training workflows for agentic models and help iterate training processes.",
+                    "Construct, clean, and validate data for MCP, Deep Research, Coding Agent, and related scenarios.",
+                    "Reproduce, extend, and maintain agentic evaluation benchmarks.",
+                ],
+                preferred: [
+                    "Experience reproducing or building MCP-Universe, MCPMark, Terminal-Bench, or similar benchmarks.",
+                    "Strong engineering skills and familiarity with agent frameworks and tool-use execution paths.",
+                    "Familiarity with post-training frameworks such as slime, AReaL, veRL, or related tooling.",
+                    "Meaningful open-source contributions or independently maintained repositories are highly valued.",
+                ],
+            },
+        ];
+
+        function useSun() {
+            const mx = useMotionValue(0.74);
+            const my = useMotionValue(0.28);
+            const sx = useSpring(mx, { stiffness: 28, damping: 26, mass: 1.1 });
+            const sy = useSpring(my, { stiffness: 28, damping: 26, mass: 1.1 });
+
+            const sunX = useTransform(sx, (v) => `${v * 100}%`);
+            const sunY = useTransform(sy, (v) => `${v * 100}%`);
+            const driftX = useTransform(sx, [0, 1], [-36, 36]);
+            const driftY = useTransform(sy, [0, 1], [26, -26]);
+            const titleGradient = useMotionTemplate`radial-gradient(circle at ${sunX} ${sunY}, #FFF8D8 0%, #E8A36B 18%, #9A6B55 45%, #5A493F 100%)`;
+            const glow = useMotionTemplate`radial-gradient(circle at ${sunX} ${sunY}, rgba(255,248,216,0.62), rgba(232,163,107,0.22) 24%, transparent 56%)`;
+
+            return { mx, my, sunX, sunY, driftX, driftY, titleGradient, glow };
+        }
+
+        function OpticalField({ sun }) {
+            return (
+                <div className="pointer-events-none fixed inset-0 overflow-hidden">
+                    <div
+                        className="absolute inset-0"
+                        style={{ background: "linear-gradient(132deg,#4C4B73 0%,#72617C 24%,#B67470 48%,#E79A66 68%,#FFE8B6 100%)" }}
+                    />
+                    <motion.div
+                        className="absolute inset-[-18%] blur-3xl"
+                        style={{
+                            x: sun.driftX,
+                            y: sun.driftY,
+                            background: "conic-gradient(from 230deg at 78% 18%, rgba(255,244,210,.55), rgba(226,146,98,.34), rgba(98,91,138,.26), rgba(255,230,181,.52), rgba(255,244,210,.55))",
+                            mixBlendMode: "soft-light",
+                        }}
+                    />
+                    <motion.div className="absolute inset-0 mix-blend-screen" style={{ background: sun.glow, opacity: 0.9 }} />
+                    <div
+                        className="absolute inset-0"
+                        style={{ background: "linear-gradient(90deg, rgba(250,244,227,.96) 0%, rgba(250,244,227,.86) 42%, rgba(250,244,227,.48) 78%, rgba(250,244,227,.25) 100%)" }}
+                    />
+                </div>
+            );
+        }
+
+        function Header({ setPage }) {
+            return (
+                <header className="fixed left-0 top-0 z-30 px-8 py-7">
+                    <button
+                        type="button"
+                        aria-label="Go to home"
+                        onClick={() => setPage("home")}
+                        className="font-serif text-[22px] tracking-[0.08em] text-[#5A493F] hover:opacity-70 transition-opacity"
+                    >
+                        Solari
+                    </button>
+                </header>
+            );
+        }
+
+        function SolariTitle({ sun }) {
+            return (
+                <div className="relative inline-block overflow-visible py-[0.08em] pr-[0.2em]">
+                    <motion.h1
+                        className="bg-clip-text font-serif font-normal leading-[0.96] tracking-[-0.035em] text-transparent"
+                        style={{
+                            fontSize: "clamp(96px, 17vw, 220px)",
+                            backgroundImage: sun.titleGradient,
+                        }}
+                    >
+                        Solari
+                    </motion.h1>
+                </div>
+            );
+        }
+
+        function Button({ children, onClick, accent = false }) {
+            return (
+                <button
+                    type="button"
+                    onClick={onClick}
+                    className="inline-flex rounded-full border px-5 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.15em] transition hover:bg-[#5A493F] hover:text-[#FFE4AF]"
+                    style={{ color: accent ? colors.accent : colors.ink, borderColor: accent ? colors.accent : colors.inkSoft }}
+                >
+                    {children}
+                </button>
+            );
+        }
+
+        function Home({ sun, setPage }) {
+            return (
+                <section className="relative z-10 flex min-h-screen items-center px-6 pt-16 lg:pl-[13vw] lg:pr-[8vw] lg:pt-0">
+                    <div className="max-w-[920px]">
+                        <SolariTitle sun={sun} />
+                        <p className="mt-10 max-w-[30em] text-[clamp(22px,2.2vw,32px)] leading-[1.16] tracking-[-0.035em]" style={{ color: colors.ink }}>
+                            Agentic models that run close to the source.
+                        </p>
+                        <p className="mt-5 max-w-[38em] text-[15px] leading-[1.8]" style={{ color: colors.muted }}>
+                            Built for local data, private environments, and long-running work systems.
+                        </p>
+                        <div className="mt-12 flex flex-wrap gap-3">
+                            {quickNav.map((item) => (
+                                <Button key={item.label} accent={item.page === "careers"} onClick={() => setPage(item.page)}>
+                                    {item.label}
+                                </Button>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+            );
+        }
+
+        function PageShell({ eyebrow, title, children }) {
+            return (
+                <section className="relative z-10 min-h-screen px-6 py-24 lg:pl-[13vw] lg:pr-[6vw]">
+                    <div className="max-w-6xl">
+                        {eyebrow ? (
+                            <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.2em]" style={{ color: colors.muted }}>
+                                {eyebrow}
+                            </p>
+                        ) : null}
+                        <h1 className="mt-8 max-w-5xl font-serif text-[clamp(52px,8vw,128px)] font-normal leading-[0.9] tracking-[-0.07em]" style={{ color: colors.ink }}>
+                            {title}
+                        </h1>
+                        <div className="mt-16">{children}</div>
+                    </div>
+                </section>
+            );
+        }
+
+        function AboutPage() {
+            return (
+                <PageShell eyebrow="" title="A frontier AI lab for local agentic intelligence.">
+                    <div className="max-w-3xl space-y-8">
+                        <p className="text-[clamp(20px,2vw,30px)] leading-[1.25] tracking-[-0.03em]" style={{ color: colors.ink }}>
+                            Solari builds local-running agentic model systems for private data, personal devices, enterprise environments, and long-running workflows.
+                        </p>
+                        <p className="text-[16px] leading-[1.85]" style={{ color: colors.muted }}>
+                            We believe a local model should not be a smaller chatbot. It should understand files, codebases, knowledge bases, business context, tools, memory, and multi-step objectives inside the environment where real work happens.
+                        </p>
+                        <p className="text-[16px] leading-[1.85]" style={{ color: colors.muted }}>
+                            Our work combines local models, agent runtime, post-training, evaluation, and product systems into one closed loop.
+                        </p>
+                    </div>
+                </PageShell>
+            );
+        }
+
+        function SimplePage({ type }) {
+            const pages = {
+                research: {
+                    eyebrow: "Research",
+                    title: "From local models to agentic systems.",
+                    body: "Our research focuses on local large models, agentic post-training, inference acceleration, evaluation systems, and next-generation generation paradigms such as diffusion language models.",
+                },
+                docs: {
+                    eyebrow: "Docs",
+                    title: "Documentation is coming soon.",
+                    body: "We are preparing public notes for model usage, agent runtime, local deployment, evaluation, and developer workflows.",
+                },
+            };
+            const copy = pages[type] || pages.research;
+            return (
+                <PageShell eyebrow={copy.eyebrow} title={copy.title}>
+                    <p className="max-w-3xl text-[17px] leading-[1.85]" style={{ color: colors.muted }}>
+                        {copy.body}
+                    </p>
+                </PageShell>
+            );
+        }
+
+        function RoleCard({ role }) {
+            return (
+                <article className="border-t py-12" style={{ borderColor: "rgba(108,90,81,0.2)" }}>
+                    <div className="max-w-5xl">
+                        <p className="font-serif text-[18px] font-normal tracking-[-0.015em]" style={{ color: colors.accent }}>
+                            {role.type}
+                        </p>
+                        <h2 className="mt-3 max-w-4xl font-serif text-[clamp(34px,4.4vw,70px)] leading-[0.98] tracking-[-0.06em]" style={{ color: colors.ink }}>
+                            {role.title}
+                        </h2>
+
+                        <div className="mt-10 grid gap-10 lg:grid-cols-2">
+                            <div>
+                                <h3 className="font-serif text-[24px] font-normal tracking-[-0.025em]" style={{ color: colors.ink }}>
+                                    Responsibilities
+                                </h3>
+                                <ul className="mt-5 space-y-4">
+                                    {role.responsibilities.map((item, index) => (
+                                        <li key={index} className="max-w-xl text-[15px] leading-[1.75]" style={{ color: colors.inkSoft }}>
+                                            {item}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                            <div>
+                                <h3 className="font-serif text-[24px] font-normal tracking-[-0.025em]" style={{ color: colors.ink }}>
+                                    Preferred
+                                </h3>
+                                <ul className="mt-5 space-y-4">
+                                    {role.preferred.map((item, index) => (
+                                        <li key={index} className="max-w-xl text-[15px] leading-[1.75]" style={{ color: colors.inkSoft }}>
+                                            {item}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+            );
+        }
+
+        function CareersPage() {
+            return (
+                <PageShell eyebrow="" title="Build with us.">
+                    <div className="max-w-5xl space-y-6">
+                        <p className="max-w-4xl text-[clamp(20px,2vw,30px)] leading-[1.28] tracking-[-0.03em]" style={{ color: colors.ink }}>
+                            We are building SOTA open-source agentic models from Shanghai.
+                        </p>
+                        <p className="max-w-4xl text-[15px] leading-[1.85]" style={{ color: colors.muted }}>
+                            We are a lean AI startup based in Shanghai Pudong, focused on releasing state-of-the-art open-source agentic models. Our team brings experience from leading universities and major technology companies, with a flat structure, fast iteration cycle, and strong execution culture.
+                        </p>
+                        <p className="max-w-4xl text-[15px] leading-[1.85]" style={{ color: colors.muted }}>
+                            We are looking for highly self-motivated people who seek high-impact work and are not satisfied with simply reproducing baselines. All roles are onsite in Shanghai, with near-term availability preferred.
+                        </p>
+                    </div>
+                    <div className="mt-16">
+                        {careerRoles.map((role) => (
+                            <RoleCard key={role.title} role={role} />
+                        ))}
+                    </div>
+                    <div className="border-t py-12" style={{ borderColor: "rgba(108,90,81,0.2)" }}>
+                        <div>
+                            <div>
+                                <h2 className="max-w-none whitespace-normal font-serif text-[clamp(28px,3vw,48px)] leading-[1.05] tracking-[-0.045em] md:whitespace-nowrap" style={{ color: colors.ink }}>
+                                    Send your resume and a short introduction.
+                                </h2>
+                                <a
+                                    href="mailto:sbz.recruit@gmail.com?subject=Solari%20Career%20Application&body=Role%20of%20interest%3A%0AInternship%20duration%20%28if%20applicable%29%3A%0AEarliest%20start%20date%3A%0A%0APlease%20attach%20your%20resume%20and%20include%20a%20short%20introduction."
+                                    className="mt-7 inline-flex rounded-full border px-5 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.15em] transition hover:bg-[#B9432B] hover:text-[#FFE4AF]"
+                                    style={{ color: colors.accent, borderColor: colors.accent }}
+                                >
+                                    Email application
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </PageShell>
+            );
+        }
+
+        function AppPage({ page, setPage, sun }) {
+            if (page === "about") return <AboutPage />;
+            if (page === "research") return <SimplePage type="research" />;
+            if (page === "docs") return <SimplePage type="docs" />;
+            if (page === "careers") return <CareersPage />;
+            return <Home sun={sun} setPage={setPage} />;
+        }
+
+        function SolariTaiyiLabWebsite() {
+            const sun = useSun();
+            const [page, setPage] = useState("home");
+
+            useEffect(() => {
+                if (typeof window !== "undefined") {
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                }
+            }, [page]);
+
+            return (
+                <div
+                    className="min-h-screen bg-[#FFE4AF] antialiased"
+                    onMouseMove={(event) => {
+                        const rect = event.currentTarget.getBoundingClientRect();
+                        sun.mx.set((event.clientX - rect.left) / rect.width);
+                        sun.my.set((event.clientY - rect.top) / rect.height);
+                    }}
+                    onMouseLeave={() => {
+                        sun.mx.set(0.74);
+                        sun.my.set(0.28);
+                    }}
+                >
+                    <OpticalField sun={sun} />
+                    <Header setPage={setPage} />
+                    <main className="relative z-10">
+                        <AppPage page={page} setPage={setPage} sun={sun} />
+                    </main>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<SolariTaiyiLabWebsite />);
+    </script>
+</body>
+</html>
